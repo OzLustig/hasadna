@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { AngularFireAuth } from 'angularfire2/auth';
+import * as firebase from 'firebase/app';
 
 import { Book } from '@/core/proto';
 import { EncodingService } from './encoding.service';
@@ -12,12 +14,17 @@ interface FirebaseElement {
 
 @Injectable()
 export class FirebaseService {
+  isOnline: boolean;
   private protobin: AngularFirestoreCollection<FirebaseElement>;
 
   constructor(
     private db: AngularFirestore,
     private encodingService: EncodingService,
+    private angularFireAuth: AngularFireAuth,
   ) {
+    this.angularFireAuth.authState.subscribe(userData => {
+      this.isOnline = !!userData;
+    });
     this.protobin = this.db.collection('protobin');
   }
 
@@ -45,5 +52,9 @@ export class FirebaseService {
     const book: Book = Book.deserializeBinary(binary);
 
     return book;
+  }
+
+  anonymousLogin(): Promise<any> {
+    return this.angularFireAuth.auth.signInAnonymously();
   }
 }

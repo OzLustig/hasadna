@@ -15,6 +15,16 @@ export class AppComponent {
     private encodingService: EncodingService,
     private firebaseService: FirebaseService,
   ) {
+    if (firebaseService.isOnline) {
+      this.load();
+    } else {
+      this.firebaseService.anonymousLogin().then(() => {
+        this.load();
+      });
+    }
+  }
+
+  load(): void {
     this.firebaseService.getBook().subscribe(book => {
       this.book = book;
     });
